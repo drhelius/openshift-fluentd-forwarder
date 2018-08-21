@@ -1,0 +1,38 @@
+#!/bin/bash
+
+FLUENT_CONF=/etc/config/fluentd.conf
+
+if [ ! -f $FLUENT_CONF ]
+then
+  echo "$FLUENT_CONF not mounted"
+  FLUENT_CONF=/opt/app-root/src/config/fluentd.conf
+  echo "Using built-in $FLUENT_CONF"
+fi
+
+export FLUENT_CONF
+
+if [ -z $SYSLOG_HOST ]
+then
+  echo "Error: No SYSLOG_HOST env variable set."
+  exit 1
+fi
+
+if [ -z $SYSLOG_PORT ]
+then
+  echo "Error: No SYSLOG_PORT env variable set."
+  exit 1
+fi
+
+if [ -z $SYSLOG_SEVERITY ]
+then
+  echo "Error: No SYSLOG_SEVERITY env variable set."
+  exit 1
+fi
+
+if [ -z $SYSLOG_TAG ]
+then
+  echo "Error: No SYSLOG_TAG env variable set."
+  exit 1
+fi
+
+bundle exec fluentd -c /opt/app-root/src/config/fluentd.conf
