@@ -1,1 +1,1 @@
-oc new-app registry.access.redhat.com/rhscl/ruby-25-rhel7~https://github.com/drhelius/openshift-fluentd-forwarder.git --name=fluentd-forwarder -l component=fluentd-forwarder -e GEM_PATH=/opt/app-root/src/bundle/ruby/2.5.0
+oc new-app -f templates/fluentd-forwarder.json --param=SYSLOG_HOST=192.168.10.110 --param=SYSLOG_PORT=514
