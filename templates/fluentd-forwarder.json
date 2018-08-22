@@ -1,0 +1,246 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "fluentd-forwarder"
+  },
+  "labels": {
+      "template": "fluentd-forwarder",
+      "app": "fluentd-forwarder"
+  },
+  "objects": [
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "labels": {
+          "app": "${NAME}",
+          "component": "${NAME}"
+        },
+        "name": "${NAME}"
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "tcp-fluentd",
+            "port": 24284,
+            "protocol": "TCP",
+            "targetPort": 24284
+          },
+          {
+            "name": "upd-fluentd",
+            "port": 24284,
+            "protocol": "UDP",
+            "targetPort": 24284
+          }
+        ],
+        "selector": {
+          "app": "${NAME}",
+          "component": "${NAME}",
+          "deploymentconfig": "${NAME}"
+        }
+      }
+    },
+
+    {
+      "apiVersion": "v1",
+      "kind": "BuildConfig",
+      "metadata": {
+        "labels": {
+          "app": "${NAME}",
+          "component": "${NAME}"
+        },
+        "name": "${NAME}"
+      },
+      "spec": {
+        "output": {
+          "to": {
+            "kind": "ImageStreamTag",
+            "name": "${NAME}:latest"
+          }
+        },
+        "source": {
+          "git": {
+            "uri": "https://github.com/drhelius/openshift-fluentd-forwarder.git"
+          },
+          "type": "Git"
+        },
+        "strategy": {
+          "sourceStrategy": {
+            "from": {
+              "kind": "ImageStreamTag",
+              "name": "ruby-25-rhel7:latest"
+            }
+          },
+          "type": "Source"
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          },
+          {
+            "type": "ImageChange"
+          }
+        ]
+      }
+    },
+
+    {
+    "apiVersion": "v1",
+    "kind": "DeploymentConfig",
+    "metadata": {
+      "labels": {
+        "app": "${NAME}",
+        "component": "${NAME}"
+      },
+      "name": "${NAME}"
+    },
+    "spec": {
+        "replicas": 2,
+        "selector": {
+          "app": "${NAME}",
+          "component": "${NAME}",
+          "deploymentconfig": "${NAME}"
+        },
+        "strategy": {
+          "activeDeadlineSeconds": 21600,
+          "resources": {},
+          "rollingParams": {
+            "intervalSeconds": 1,
+            "maxSurge": "25%",
+            "maxUnavailable": "25%",
+            "timeoutSeconds": 600,
+            "updatePeriodSeconds": 1
+          },
+          "type": "Rolling"
+        },
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "${NAME}",
+              "component": "${NAME}",
+              "deploymentconfig": "${NAME}"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "GEM_PATH",
+                    "value": "/opt/app-root/src/bundle/ruby/2.5.0"
+                  },
+                  {
+                    "name": "SYSLOG_HOST",
+                    "value": "192.168.10.110"
+                  },
+                  {
+                    "name": "SYSLOG_PORT",
+                    "value": "514"
+                  },
+                  {
+                    "name": "SYSLOG_FACILITY",
+                    "value": "user"
+                  },
+                  {
+                    "name": "SYSLOG_SEVERITY",
+                    "value": "notice"
+                  },
+                  {
+                    "name": "SYSLOG_PROGRAM",
+                    "value": "fluentd"
+                  }
+                ],
+                "image": " ",
+                "imagePullPolicy": "Always",
+                "name": "${NAME}",
+                "ports": [
+                  {
+                    "containerPort": 24284,
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 24284,
+                    "protocol": "UDP"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "triggers": [
+          {
+            "type": "ConfigChange"
+          },
+          {
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${NAME}"
+              ],
+              "from": {
+                "kind": "ImageStreamTag",
+                "name": "${NAME}:latest"
+              }
+            },
+            "type": "ImageChange"
+          }
+        ]
+      }
+    },
+
+    {
+      "apiVersion": "v1",
+      "kind": "ImageStream",
+      "metadata": {
+        "labels": {
+          "app": "${NAME}",
+          "component": "${NAME}"
+        },
+        "name": "${NAME}",
+        "annotations": {
+          "description": "Keeps track of changes in the application image"
+        }
+      }
+    },
+
+    {
+    "apiVersion": "v1",
+    "kind": "ImageStream",
+    "metadata": {
+      "labels": {
+        "app": "${NAME}",
+        "component": "${NAME}"
+      },
+      "name": "ruby-25-rhel7"
+    },
+    "spec": {
+      "lookupPolicy": {
+        "local": false
+      },
+      "tags": [
+        {
+          "from": {
+            "kind": "DockerImage",
+            "name": "registry.access.redhat.com/rhscl/ruby-25-rhel7"
+          },
+          "name": "latest",
+          "referencePolicy": {
+            "type": "Source"
+          }
+        }
+      ]
+    }
+  }
+
+  ],
+  "parameters": [
+    {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the frontend objects defined in this template.",
+      "required": true,
+      "value": "fluentd-forwarder"
+    }
+  ]
+}
