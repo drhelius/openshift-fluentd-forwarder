@@ -61,7 +61,8 @@
         },
         "source": {
           "git": {
-            "uri": "https://github.com/drhelius/openshift-fluentd-forwarder.git"
+            "uri": "${SOURCE_REPOSITORY_URL}",
+            "ref": "${SOURCE_REPOSITORY_REF}"
           },
           "type": "Git"
         },
@@ -96,7 +97,7 @@
       "name": "${NAME}"
     },
     "spec": {
-        "replicas": 2,
+        "replicas": "${REPLICAS}",
         "selector": {
           "app": "${NAME}",
           "component": "${NAME}",
@@ -132,23 +133,23 @@
                   },
                   {
                     "name": "SYSLOG_HOST",
-                    "value": "192.168.10.110"
+                    "value": "${SYSLOG_HOST}"
                   },
                   {
                     "name": "SYSLOG_PORT",
-                    "value": "514"
+                    "value": "${SYSLOG_PORT}"
                   },
                   {
                     "name": "SYSLOG_FACILITY",
-                    "value": "user"
+                    "value": "${SYSLOG_FACILITY}"
                   },
                   {
                     "name": "SYSLOG_SEVERITY",
-                    "value": "notice"
+                    "value": "${SYSLOG_SEVERITY}"
                   },
                   {
                     "name": "SYSLOG_PROGRAM",
-                    "value": "fluentd"
+                    "value": "${SYSLOG_PROGRAM}"
                   }
                 ],
                 "image": " ",
@@ -238,9 +239,61 @@
     {
       "name": "NAME",
       "displayName": "Name",
-      "description": "The name assigned to all of the frontend objects defined in this template.",
+      "description": "The name assigned to all of the objects defined in this template.",
       "required": true,
       "value": "fluentd-forwarder"
+    },
+    {
+      "name": "REPLICAS",
+      "displayName": "Replicas",
+      "description": "Number of replicas for the fluentd-forwarder.",
+      "required": true,
+      "value": "2"
+    },
+    {
+      "name": "SOURCE_REPOSITORY_URL",
+      "displayName": "Git Repository URL",
+      "description": "The URL of the repository with the source code.",
+      "required": true,
+      "value": "https://github.com/drhelius/openshift-fluentd-forwarder.git"
+    },
+    {
+      "name": "SOURCE_REPOSITORY_REF",
+      "displayName": "Git Reference",
+      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
+    },
+    {
+      "name": "SYSLOG_HOST",
+      "displayName": "Syslog host",
+      "description": "Syslog host to forward logs to",
+      "required": true
+    },
+    {
+      "name": "SYSLOG_PORT",
+      "displayName": "Syslog port",
+      "description": "Syslog port to forward logs to",
+      "required": true
+    },
+    {
+      "name": "SYSLOG_FACILITY",
+      "displayName": "Syslog facility",
+      "description": "Syslog facility to forward logs to",
+      "required": true,
+      "value": "user"
+    },
+    {
+      "name": "SYSLOG_SEVERITY",
+      "displayName": "Syslog severity",
+      "description": "Logs will sent with this severity",
+      "required": true,
+      "value": "notice"
+    },
+    {
+      "name": "SYSLOG_PROGRAM",
+      "displayName": "Syslog program",
+      "description": "Logs will labeled with this program name",
+      "required": true,
+      "value": "fluentd"
     }
   ]
 }
