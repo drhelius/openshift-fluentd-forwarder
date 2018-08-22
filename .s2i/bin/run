@@ -23,16 +23,25 @@ then
   exit 1
 fi
 
+if [ -z $SYSLOG_FACILITY ]
+then
+  echo "Error: No SYSLOG_FACILITY env variable set."
+  SYSLOG_FACILITY=user
+  echo "Using default SYSLOG_FACILITY: $SYSLOG_FACILITY"
+fi
+
 if [ -z $SYSLOG_SEVERITY ]
 then
   echo "Error: No SYSLOG_SEVERITY env variable set."
-  exit 1
+  SYSLOG_SEVERITY=notice
+  echo "Using default SYSLOG_SEVERITY: $SYSLOG_SEVERITY"
 fi
 
-if [ -z $SYSLOG_TAG ]
+if [ -z $SYSLOG_PROGRAM ]
 then
-  echo "Error: No SYSLOG_TAG env variable set."
-  exit 1
+  echo "Error: No SYSLOG_PROGRAM env variable set."
+  SYSLOG_PROGRAM=fluentd
+  echo "Using default SYSLOG_PROGRAM: $SYSLOG_PROGRAM"
 fi
 
 bundle exec fluentd -c /opt/app-root/src/config/fluentd.conf
